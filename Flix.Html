@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FL!X Pay – Demo</title>
+
+<style>
+:root{
+  --bg:#0b0f1a;
+  --card:#111827;
+  --text:#e5e7eb;
+  --accent:#22c55e;
+}
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+.app{max-width:420px;margin:auto;padding:16px}
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:12px;
+}
+.hidden{display:none}
+.balance{font-size:30px;font-weight:bold}
+.small{font-size:12px;opacity:.8}
+
+.logo{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px
+}
+.logo svg{width:42px;height:42px}
+.logo span{font-size:22px;font-weight:800}
+
+.tabs{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px
+}
+.tabs button{
+  flex:1 1 30%;
+  padding:10px;border:none;border-radius:10px;
+  background:#1f2937;color:white
+}
+input,button{
+  width:100%;padding:12px;margin-top:8px;
+  border:none;border-radius:10px;font-size:15px
+}
+input{background:#1f2937;color:white}
+.action{background:var(--accent);font-weight:bold}
+
+.code{
+  font-size:30px;letter-spacing:6px;text-align:center
+}
+
+/* P2P */
+.contact{
+  display:flex;align-items:center;gap:10px;
+  background:#1f2937;padding:10px;
+  border-radius:12px;margin-bottom:6px;
+  cursor:pointer
+}
+.contact img{
+  width:40px;height:40px;border-radius:50%;
+  object-fit:cover;background:#374151
+}
+.contact.active{outline:2px solid var(--accent)}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- LOGO -->
+<div class="logo">
+<svg viewBox="0 0 100 100">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#22c55e"/>
+<stop offset="100%" stop-color="#16a34a"/>
+</linearGradient>
+</defs>
+<rect x="10" y="10" width="80" height="80" rx="22" fill="url(#g)"/>
+<path d="M30 55 L50 30 L70 55" stroke="#0b0f1a" stroke-width="8" fill="none"/>
+</svg>
+<span>FL!X Pay</span>
+</div>
+
+<div class="small">FAKE • DEMO • fintech simulator</div>
+
+<!-- PROFILE -->
+<div class="card" style="display:flex;gap:12px;align-items:center">
+<img id="avatar" style="width:56px;height:56px;border-radius:50%;background:#1f2937;object-fit:cover">
+<div>
+Witaj, <b id="name">User</b><br>
+<div class="balance">∞ PLN</div>
+<div class="small">Saldo FAKE</div>
+</div>
+</div>
+
+<div class="tabs">
+<button onclick="show('home')">Home</button>
+<button onclick="show('flix')">FL!X</button>
+<button onclick="show('p2p')">P2P</button>
+<button onclick="show('fastpay')">Fast Pay</button>
+<button onclick="show('card')">Karta</button>
+<button onclick="show('history')">Historia</button>
+<button onclick="show('settings')">Settings</button>
+</div>
+
+<!-- HOME -->
+<div class="card" id="home">
+<button class="action" onclick="genFlix()">Szybki FL!X</button>
+<button onclick="show('p2p')">Wyślij P2P</button>
+<button onclick="show('fastpay')">Fast Pay 💳</button>
+</div>
+
+<!-- FL!X -->
+<div class="card hidden" id="flix">
+<h3>FL!X Code</h3>
+<div class="code" id="flixCode">------</div>
+<div class="small">Ważny: <b id="flixTimer">0</b>s</div>
+<button class="action" onclick="genFlix()">Generuj FL!X</button>
+</div>
+
+<!-- P2P -->
+<div class="card hidden" id="p2p">
+<h3>P2P (fake)</h3>
+<div id="contacts"></div>
+<input id="amount" type="number" placeholder="Kwota">
+<button class="action" onclick="sendP2P()">Wyślij</button>
+</div>
+
+<!-- FAST PAY -->
+<div class="card hidden" id="fastpay">
+<h3>💳 Fast Pay</h3>
+<input id="fpName" placeholder="Nazwisko odbiorcy">
+<input id="fpNumber" placeholder="Numer (konto / telefon)">
+<input id="fpAmount" type="number" placeholder="Kwota">
+<button class="action" onclick="sendFastPay()">Wyślij Fast Pay</button>
+<div class="small">Natychmiastowy • FAKE</div>
+</div>
+
+<!-- CARD -->
+<div class="card hidden" id="card">
+<h3>💳 Gold Card</h3>
+<div class="small">FAKE • DEMO</div>
+<div style="margin-top:12px;padding:18px;border-radius:18px;
+background:linear-gradient(135deg,#d4af37,#8b6b1f);color:black;font-weight:bold">
+<div style="font-size:12px">DEMO GOLD</div>
+<div id="cardNumber" style="font-size:20px;letter-spacing:3px;margin:10px 0">
+**** **** **** ****
+</div>
+<div style="display:flex;justify-content:space-between;font-size:14px">
+<span id="cardName">USER</span>
+<span id="cardExp">MM/YY</span>
+</div>
+</div>
+<button onclick="genCard()">Generuj kartę</button>
+<button onclick="toggleCard()">Pokaż / Ukryj</button>
+<div class="small">CVV: <b id="cardCVV">***</b></div>
+</div>
+
+<!-- HISTORY -->
+<div class="card hidden" id="history">
+<h3>Historia</h3>
+<div id="hist">Brak</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="card hidden" id="settings">
+<h3>Ustawienia</h3>
+<input id="nameInput" placeholder="Nick">
+<button class="action" onclick="saveName()">Zapisz nick</button>
+
+<label class="small">Avatar</label>
+<input type="file" accept="image/*" onchange="uploadAvatar(this)">
+<button onclick="removeAvatar()">Usuń avatar</button>
+
+<button onclick="resetHist()">Reset historii</button>
+<button onclick="resetAll()">Reset wszystkiego</button>
+</div>
+
+</div>
+
+<script>
+let flixInterval, cardVisible=false, selectedContact=null;
+
+const contactsData=[
+{name:"@anna.pln",avatar:"https://i.pravatar.cc/100?img=1"},
+{name:"@kuba_fx",avatar:"https://i.pravatar.cc/100?img=2"},
+{name:"@olek.pay",avatar:"https://i.pravatar.cc/100?img=3"},
+{name:"@magda.cash",avatar:"https://i.pravatar.cc/100?img=4"},
+{name:"@patryk_qr",avatar:"https://i.pravatar.cc/100?img=5"},
+{name:"@zuzia.tap",avatar:"https://i.pravatar.cc/100?img=6"}
+];
+
+function show(id){
+["home","flix","p2p","fastpay","card","history","settings"].forEach(x=>{
+document.getElementById(x).classList.add("hidden");
+});
+document.getElementById(id).classList.remove("hidden");
+}
+
+function genFlix(){
+show("flix");
+clearInterval(flixInterval);
+const code=Math.floor(100000+Math.random()*900000);
+flixCode.innerText=code;
+let t=60; flixTimer.innerText=t;
+
+addHist(`⚡ FL!X ${code} – użyty (FAKE)`);
+
+flixInterval=setInterval(()=>{
+t--; flixTimer.innerText=t;
+if(t<=0){clearInterval(flixInterval);flixCode.innerText="------";}
+},1000);
+}
+
+function renderContacts(){
+const box=document.getElementById("contacts");
+box.innerHTML="";
+contactsData.forEach(c=>{
+const d=document.createElement("div");
+d.className="contact";
+d.innerHTML=`<img src="${c.avatar}"><b>${c.name}</b>`;
+d.onclick=()=>{
+document.querySelectorAll(".contact").forEach(x=>x.classList.remove("active"));
+d.classList.add("active");
+selectedContact=c.name;
+};
+box.appendChild(d);
+});
+}
+
+function sendP2P(){
+if(!selectedContact) return alert("Wybierz kontakt");
+if(amount.value<=0) return alert("Błąd kwoty");
+addHist(`💸 P2P ${amount.value} PLN → ${selectedContact}`);
+amount.value="";
+}
+
+function sendFastPay(){
+if(!fpName.value||!fpNumber.value||fpAmount.value<=0)
+return alert("Uzupełnij dane");
+
+addHist(`💳 FastPay ${fpAmount.value} PLN → ${fpName.value} (${fpNumber.value})`);
+fpName.value=fpNumber.value=fpAmount.value="";
+}
+
+function addHist(txt){
+let h=localStorage.getItem("history")||"";
+h+=txt+"<br>";
+localStorage.setItem("history",h);
+load();
+}
+
+function genCard(){
+localStorage.setItem("card_num","9999 "+Math.floor(1000+Math.random()*9000)+" "+
+Math.floor(1000+Math.random()*9000)+" "+
+Math.floor(1000+Math.random()*9000));
+localStorage.setItem("card_cvv",Math.floor(100+Math.random()*900));
+localStorage.setItem("card_exp","0"+(1+Math.floor(Math.random()*9))+"/2"+Math.floor(Math.random()*5));
+cardVisible=true;
+renderCard();
+}
+function toggleCard(){cardVisible=!cardVisible;renderCard();}
+function renderCard(){
+const n=localStorage.getItem("card_num");
+if(!n) return;
+cardNumber.innerText=cardVisible?n:"**** **** **** ****";
+cardCVV.innerText=cardVisible?localStorage.getItem("card_cvv"):"***";
+cardExp.innerText=cardVisible?localStorage.getItem("card_exp"):"MM/YY";
+cardName.innerText=(localStorage.getItem("name")||"USER").toUpperCase();
+}
+
+function uploadAvatar(i){
+const f=i.files[0]; if(!f) return;
+const r=new FileReader();
+r.onload=e=>{localStorage.setItem("avatar",e.target.result);renderAvatar();}
+r.readAsDataURL(f);
+}
+function removeAvatar(){localStorage.removeItem("avatar");renderAvatar();}
+function renderAvatar(){
+const a=localStorage.getItem("avatar");
+avatar.src=a||""; avatar.style.background=a?"none":"#1f2937";
+}
+
+function saveName(){
+if(nameInput.value){localStorage.setItem("name",nameInput.value);load();}
+}
+function resetHist(){localStorage.removeItem("history");load();}
+function resetAll(){localStorage.clear();location.reload();}
+
+function load(){
+name.innerText=localStorage.getItem("name")||"User";
+hist.innerHTML=localStorage.getItem("history")||"Brak";
+renderContacts();
+renderCard();
+renderAvatar();
+}
+load();
+</script>
+
+</body>
+</html>
